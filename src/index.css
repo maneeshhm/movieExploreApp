@@ -1,0 +1,8 @@
+body{
+    background-color:rgb(245, 245, 247) !important;
+}
+
+.movieCard{
+    overflow-x: auto;
+    flex-wrap: nowrap;
+}
