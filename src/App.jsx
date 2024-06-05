@@ -1,49 +1,66 @@
-import { useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import "./App.css";
 import Header from "./UIComponents/Header";
 import MovieList from "./Components/MovieList";
+import SpinnerStyle from "./UIComponents/SpinnerStyle";
 
 function App() {
-  const [movies, setMovies] = useState([
-    {
-      Title: "The Fast and the Furious",
-      Year: "2001",
-      Rated: "PG-13",
-      Released: "22 Jun 2001",
-      Runtime: "106 min",
-      Genre: "Action, Crime, Thriller",
-      Director: "Rob Cohen",
-      Writer: "Ken Li, Gary Scott Thompson, Erik Bergquist",
-      Actors: "Vin Diesel, Paul Walker, Michelle Rodriguez",
-      Plot: "Los Angeles police officer Brian O'Conner must decide where his loyalty really lies when he becomes enamored with the street racing world he has been sent undercover to end it.",
-      Language: "English, Spanish",
-      Country: "United States, Germany",
-      Awards: "11 wins & 18 nominations",
-      Poster:
-        "https://m.media-amazon.com/images/M/MV5BMGVmMWNiMDktYjQ0Mi00MWIxLTk0N2UtN2ZlYTdkN2IzNDNlXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
-    },
-    {
-      Poster:
-        "https://m.media-amazon.com/images/M/MV5BMGVmMWNiMDktYjQ0Mi00MWIxLTk0N2UtN2ZlYTdkN2IzNDNlXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
-    },
-    {
-      Poster:
-        "https://m.media-amazon.com/images/M/MV5BMGVmMWNiMDktYjQ0Mi00MWIxLTk0N2UtN2ZlYTdkN2IzNDNlXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
-    },
-    {
-      Poster:
-        "https://m.media-amazon.com/images/M/MV5BMGVmMWNiMDktYjQ0Mi00MWIxLTk0N2UtN2ZlYTdkN2IzNDNlXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
-    },
-    {
-      Poster:
-        "https://m.media-amazon.com/images/M/MV5BMGVmMWNiMDktYjQ0Mi00MWIxLTk0N2UtN2ZlYTdkN2IzNDNlXkEyXkFqcGdeQXVyODE5NzE3OTE@._V1_SX300.jpg",
-    },
-  ]);
+  //set error if there is any error when calling API
+  const [isError, setIsError] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+
+  // loading intial popular movies
+  const popularMovies = [
+    "tt12037194",
+    "tt17279496",
+    "tt1684562",
+    "tt1392190",
+    "tt11389872",
+    "tt15239678",
+    "tt16426418",
+    "tt5672290",
+  ];
+  const [movies, setMovies] = useState([]);
+
+  useEffect(() => {
+    const BASEURL = "http://www.omdbapi.com/?apikey=94c4d5fe";
+
+    setIsLoading(true);
+    const fetchMovies = async () => {
+      const data = [];
+
+      try {
+        for (const id of popularMovies) {
+          const response = await fetch(`${BASEURL}&i=${id}`);
+          const movieData = await response.json();
+          data.push(movieData);
+        }
+      } catch (e) {
+        setIsError(e);
+      } finally {
+        setIsLoading(false);
+      }
+
+      setMovies(data);
+      console.log(data);
+    };
+    fetchMovies();
+  }, []);
+
+  //display MovieList component according to the conditions
+  let movieComponent;
+  if (isError) {
+    movieComponent = <h1>Error is occured</h1>;
+  } else if (isLoading) {
+    movieComponent = <SpinnerStyle></SpinnerStyle>;
+  } else {
+    movieComponent = <MovieList movies={movies}></MovieList>;
+  }
 
   return (
     <>
       <Header></Header>
-      <MovieList movies={movies}></MovieList>
+      {movieComponent}
     </>
   );
 }
